@@ -29,7 +29,7 @@
 #define LINE_COUNT 1000
 
 // Define global variables
-#define SIZE 32
+#define SIZE 36
 float Px[SIZE + 1][SIZE + 1];
 float Py[SIZE + 1][SIZE + 1];
 float Pz[SIZE + 1][SIZE + 1];
@@ -37,12 +37,12 @@ int xangle = 0;
 int yangle = 0;
 int zangle = 0;
 int mode = 2;
-int count = 0;
+int lineCount = 0;
 float point[LINE_COUNT][4];
 bool drawLine = false;
 
 //---------------------------------------
-// Define vase surface
+// Define vase surface borrowed from Gauch's source code. Modified the orientation from drawing around the Y-axis to drawing on the X-axis and changed the equation drawing the "vase shape" to my own.
 //---------------------------------------
 void define_vase()
 {
@@ -55,7 +55,7 @@ void define_vase()
       Pz[i][0] = 0.0;
    }
 
-   // Perform rotation around Y axis
+   // Perform rotation around X axis
    for (int j = 1; j <= SIZE; j++)
    {
       float theta = j * 2 * M_PI / SIZE;
@@ -64,15 +64,41 @@ void define_vase()
       for (int i = 0; i <= SIZE; i++)
       {
           Px[i][j] = Px[i][0];
-          Py[i][j] = Py[i][0] * cos_theta - Pz[i][0] * sin_theta;;
+          Py[i][j] = Py[i][0] * cos_theta - Pz[i][0] * sin_theta;
           Pz[i][j] = Py[i][0] * sin_theta + Pz[i][0] * cos_theta;
       }
    }
 }
 
+//---------------------------------------
+// Define gatherDataPoints this method takes the data points that were gathered from drawing the shape manually and doing the same calculations as in the define vase method except for the rotation around the X-axis for the shape drawn.
+//---------------------------------------
+
+void gatherDataPoints(){
+    int samplePoints = lineCount/36;
+    for(int i = 0; i <= SIZE; i++){
+        Px[i][0] = point[i*samplePoints][0];
+        Py[i][0] = point[i*samplePoints][1];
+        Pz[i][0] = 0;
+    }
+        
+    for (int j = 1; j <= SIZE; j++)
+    {
+        float theta = j * 2 * M_PI / SIZE;
+        float cos_theta = cos(theta);
+        float sin_theta = sin(theta);
+        for (int i = 0; i <= SIZE; i++)
+        {
+            Px[i][j] = Px[i][0];
+            Py[i][j] = Py[i][0] * cos_theta - Pz[i][0] * sin_theta;
+            Pz[i][j] = Py[i][0] * sin_theta + Pz[i][0] * cos_theta;
+        }
+    }
+}
+
 
 //---------------------------------------
-// Init function for OpenGL
+// Init function for OpenGL borrowed from Gauch's source code
 //---------------------------------------
 void init()
 {
@@ -82,15 +108,15 @@ void init()
    glOrtho(MIN_X_VIEW, MAX_X_VIEW,
       MIN_Y_VIEW, MAX_Y_VIEW,
       MIN_Z_VIEW, MAX_Z_VIEW);
-   xangle = (xangle + 5) % 360;
-   yangle = (yangle + 5) % 360;
-   zangle = (zangle + 5) % 360;
+   xangle = (xangle) % 360;
+   yangle = (yangle) % 360;
+   zangle = (zangle) % 360;
    glEnable(GL_DEPTH_TEST);
    define_vase();
 }
 
 //---------------------------------------
-// Function to draw a zero thickness wall
+// Function to draw a zero thickness line. created a line with 0 thickness. borrowed from Gauch's source code
 //---------------------------------------
 void createLine(float x1, float y1, float x2, float y2)
 {
@@ -104,7 +130,7 @@ void createLine(float x1, float y1, float x2, float y2)
 }
 
 //---------------------------------------
-// Keyboard callback for OpenGL
+// Keyboard callback for OpenGL borrowed from Gauch's source code
 //---------------------------------------
 void keyboard(unsigned char key, int x, int y)
 {
@@ -123,10 +149,13 @@ void keyboard(unsigned char key, int x, int y)
       zangle += 5;
 
    // Redraw objects
+    printf("x-angle: %d ",xangle);
+    printf("y-angle: %d ",yangle);
+    printf("z-angle: %d ",zangle);
    glutPostRedisplay();
 }
 //---------------------------------------
-// Mouse callback for OpenGL
+// Mouse callback for OpenGL borrowed from Gauch's source code, modified the code. Leaving the comments so it makes it easier to show where I changed the code from what working code Dr. Gauch had to changing it to draw through the entire motion. This allowed for the shape to be drawn once the mouse click is over, the lineCount is reset to 0 so that upon clicking the mouse again it will erase the old data points and only show the new drawing.
 //---------------------------------------
 void mouse(int button, int state, int x, int y)
 {
@@ -152,12 +181,14 @@ void mouse(int button, int state, int x, int y)
 //      point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
 //      count++;
       drawLine = false;
+      gatherDataPoints();
+      lineCount = 0;
       glutPostRedisplay();
    }
 }
 
 //---------------------------------------
-// Motion callback for OpenGL
+// Motion callback for OpenGL. modified the motion method so that the drawing only occured once the mouse had been clicked and stopped following and tracking the points after the click was selected.
 //---------------------------------------
 void motion(int x, int y)
 {
@@ -170,20 +201,17 @@ void motion(int x, int y)
 
    // Handle mouse motion
     if(drawLine == true){
-        point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-        point[count][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
-        count++;
+        point[lineCount][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
+        point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+        lineCount++;
         
     }
     glutPostRedisplay();
-//   point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-//   point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
-   
 }
 
 
 //---------------------------------------
-// Display callback for OpenGL
+// Display callback for OpenGL borrowed from Gauch's source code
 //---------------------------------------
 void display()
 {
@@ -191,9 +219,10 @@ void display()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
+    
    glRotatef(xangle, 1.0, 0.0, 0.0);
    glRotatef(yangle, 0.0, 1.0, 0.0);
-   glRotatef(zangle, 0.0, 1.0, 0.0);
+   glRotatef(zangle, 0.0, 0.0, 1.0);
     
     // Draw object surface
     glColor3f(1.0, 1.0, 1.0);
@@ -213,7 +242,7 @@ void display()
     }
 
    // Draw all lines
-   for (int i=1; i<count; i++)
+   for (int i=1; i<lineCount; i++)
     
          createLine(point[i-1][0], point[i-1][1], point[i][0], point[i][1]);
     
@@ -221,7 +250,7 @@ void display()
 }
 
 //---------------------------------------
-// Main program
+// Main program borrowed from Gauch's source code
 //---------------------------------------
 int main(int argc, char *argv[])
 {

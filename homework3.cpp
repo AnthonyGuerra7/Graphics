@@ -75,6 +75,10 @@ void define_vase()
    }
 }
 
+void gatherDataPoints(){
+    int samplePoints = count/36;
+}
+
 //---------------------------------------
 // Keyboard callback for OpenGL borrowing from Dr.Gauch's source code
 //---------------------------------------
