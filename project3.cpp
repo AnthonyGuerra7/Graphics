@@ -49,8 +49,8 @@ void define_vase()
    for (int i = 0; i <= SIZE; i++)
    {
       float theta = i * 2 * M_PI / SIZE;
-      Px[i][0] = 0.2 * sin(theta) + 0.5;
-      Py[i][0] = (float) i / (float) SIZE - 0.5;
+      Px[i][0] = 40*(0.2 * sin(theta) + 0.5);
+      Py[i][0] = 40*((float) i / (float) SIZE - 0.5);
       Pz[i][0] = 0.0;
    }
 
