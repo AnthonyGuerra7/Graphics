@@ -1,1 +1,1 @@
-# GraphicsHW3
+# Graphics
