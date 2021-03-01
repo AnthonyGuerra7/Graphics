@@ -50,8 +50,8 @@ void define_vase()
    for (int i = 0; i <= SIZE; i++)
    {
       float theta = i * 2 * M_PI / SIZE;
-      Px[i][0] = 40*((float) i / (float) SIZE - 0.5);
-       Py[i][0]= 40*((abs(sin(theta*theta)/pow(2,((theta*theta) - M_PI/2)/M_PI))));
+      Px[i][0] = 30*((float) i / (float) SIZE - 0.5);
+       Py[i][0]= 30*((abs(sin(theta*theta)/pow(2,((theta*theta) - M_PI/2)/M_PI)))+0.25);
       Pz[i][0] = 0.0;
    }
 
@@ -278,3 +278,4 @@ int main(int argc, char *argv[])
    glutMainLoop();
    return 0;
 }
+
