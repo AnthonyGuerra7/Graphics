@@ -132,9 +132,7 @@ void mouse(int button, int state, int x, int y)
    {  drawLine = true;
        printf("In mouse: --> x: %d y: %d\n",x,y );
        printf("I am in here\n");
-       point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) *x_scale;
-       point[count][1] = MIN_Y_VIEW + (y - MIN_Y_SCREEN) *y_scale;
-       count++;
+       
    }
 
    // Handle mouse up
@@ -156,13 +154,13 @@ void motion(int x, int y)
    float y_scale = (MIN_Y_VIEW - MAX_Y_VIEW) /
       (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
 
-//   if(drawLine){
-//     printf("I am in here\n");
-//     point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) *x_scale;
-//     point[count][1] = MIN_Y_VIEW + (y - MIN_Y_SCREEN) *y_scale;
-//     count++;
-//     glutPostRedisplay();
-//   }
+   if(drawLine){
+     printf("I am in here\n");
+     point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) *x_scale;
+     point[count][1] = MIN_Y_VIEW + (y - MIN_Y_SCREEN) *y_scale;
+     count++;
+     glutPostRedisplay();
+   }
 
 }
 

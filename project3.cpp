@@ -149,9 +149,9 @@ void keyboard(unsigned char key, int x, int y)
       zangle += 5;
 
    // Redraw objects
-    printf("x-angle: %d ",xangle);
-    printf("y-angle: %d ",yangle);
-    printf("z-angle: %d ",zangle);
+//    printf("x-angle: %d ",xangle);
+//    printf("y-angle: %d ",yangle);
+//    printf("z-angle: %d ",zangle);
    glutPostRedisplay();
 }
 //---------------------------------------
@@ -191,18 +191,32 @@ void mouse(int button, int state, int x, int y)
 // Motion callback for OpenGL. modified the motion method so that the drawing only occured once the mouse had been clicked and stopped following and tracking the points after the click was selected.
 //---------------------------------------
 void motion(int x, int y)
-{
+{   //This will help prevent the user from drawing a curve that will cross the x-axis
+    if( y == 0){
+        y = abs(y);
+    }
+    
    // Calculate scale factors
    if (mode != 2) return;
    float x_scale = (MAX_X_VIEW - MIN_X_VIEW) /
       (float)(MAX_X_SCREEN - MIN_X_SCREEN);
    float y_scale = (MIN_Y_VIEW - MAX_Y_VIEW) /
       (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
-
-   // Handle mouse motion
+    
+   // Handle mouse motion && error checks so that the y points do not cross the x-axis
     if(drawLine == true){
         point[lineCount][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-        point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+        if((point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale) < 0){
+            point[lineCount][1] = abs(MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale);
+            printf("I am below x");
+        }
+        else if((point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale) == 0){
+            (point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) + y )* y_scale;
+        }
+        else{
+            point[lineCount][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN)* y_scale;
+        }
+        
         lineCount++;
         
     }
