@@ -39,6 +39,7 @@ int zangle = 0;
 int mode = 2;
 int count = 0;
 float point[LINE_COUNT][4];
+bool drawLine = false;
 
 //---------------------------------------
 // Define vase surface
@@ -49,8 +50,8 @@ void define_vase()
    for (int i = 0; i <= SIZE; i++)
    {
       float theta = i * 2 * M_PI / SIZE;
-      Px[i][0] = 40*(0.2 * sin(theta) + 0.5);
-      Py[i][0] = 40*((float) i / (float) SIZE - 0.5);
+      Px[i][0] = 40*((float) i / (float) SIZE - 0.5);
+       Py[i][0]= 40*((abs(sin(theta*theta)/pow(2,((theta*theta) - M_PI/2)/M_PI))));
       Pz[i][0] = 0.0;
    }
 
@@ -62,9 +63,9 @@ void define_vase()
       float sin_theta = sin(theta);
       for (int i = 0; i <= SIZE; i++)
       {
-     Px[i][j] = Px[i][0] * cos_theta - Pz[i][0] * sin_theta;
-     Py[i][j] = Py[i][0];
-     Pz[i][j] = Px[i][0] * sin_theta + Pz[i][0] * cos_theta;
+          Px[i][j] = Px[i][0];
+          Py[i][j] = Py[i][0] * cos_theta - Pz[i][0] * sin_theta;;
+          Pz[i][j] = Py[i][0] * sin_theta + Pz[i][0] * cos_theta;
       }
    }
 }
@@ -91,7 +92,7 @@ void init()
 //---------------------------------------
 // Function to draw a zero thickness wall
 //---------------------------------------
-void wall(float x1, float y1, float x2, float y2)
+void createLine(float x1, float y1, float x2, float y2)
 {
    float z1 = 0;
 
@@ -130,25 +131,27 @@ void keyboard(unsigned char key, int x, int y)
 void mouse(int button, int state, int x, int y)
 {
    // Calculate scale factors
-   if (mode != 2) return;
-   float x_scale = (MAX_X_VIEW - MIN_X_VIEW) /
-      (float)(MAX_X_SCREEN - MIN_X_SCREEN);
-   float y_scale = (MIN_Y_VIEW - MAX_Y_VIEW) /
-      (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
+//   if (mode != 2) return;
+//   float x_scale = (MAX_X_VIEW - MIN_X_VIEW) /
+//      (float)(MAX_X_SCREEN - MIN_X_SCREEN);
+//   float y_scale = (MIN_Y_VIEW - MAX_Y_VIEW) /
+//      (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
 
    // Handle mouse down
    if (state == GLUT_DOWN)
    {
-      point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-      point[count][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+//      point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
+//      point[count][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+       drawLine = true;
    }
 
    // Handle mouse up
    else if (state == GLUT_UP)
    {
-      point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-      point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
-      count++;
+//      point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
+//      point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+//      count++;
+      drawLine = false;
       glutPostRedisplay();
    }
 }
@@ -166,9 +169,16 @@ void motion(int x, int y)
       (float)(MAX_Y_SCREEN - MIN_Y_SCREEN);
 
    // Handle mouse motion
-   point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
-   point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
-   glutPostRedisplay();
+    if(drawLine == true){
+        point[count][0] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
+        point[count][1] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+        count++;
+        
+    }
+    glutPostRedisplay();
+//   point[count][2] = MIN_X_VIEW + (x - MIN_X_SCREEN) * x_scale;
+//   point[count][3] = MAX_Y_VIEW + (y - MIN_Y_SCREEN) * y_scale;
+   
 }
 
 
@@ -202,10 +212,11 @@ void display()
        glEnd();
     }
 
-   // Draw all walls
-   for (int i=0; i<=count; i++)
-      if ((point[i][0] != point[i][2]) || (point[i][1] != point[i][3]))
-         wall(point[i][0], point[i][1], point[i][2], point[i][3]);
+   // Draw all lines
+   for (int i=1; i<count; i++)
+    
+         createLine(point[i-1][0], point[i-1][1], point[i][0], point[i][1]);
+    
    glFlush();
 }
 
