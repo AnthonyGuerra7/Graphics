@@ -3,4 +3,4 @@
 Date: **12/21/2021**
 
 ## Yesterday's Task
-    [ x ] Researched endpoint
+    - [ x ] Researched endpoint
